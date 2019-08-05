@@ -140,17 +140,16 @@ func EndBlocker(ctx sdk.Context, k Keeper) (resTags sdk.Tags) {
 
 			// Set price to the store
 			k.SetLunaSwapRate(ctx, denom, mod)
-
-			resTags = sdk.NewTags(
+			resTags = resTags.AppendTags(sdk.NewTags(
 				tags.Action, tags.ActionPriceUpdate,
 				tags.Denom, denom,
 				tags.Price, mod.String(),
-			)
+			))
 		} else {
-			resTags = sdk.NewTags(
+			resTags = resTags.AppendTags(sdk.NewTags(
 				tags.Action, tags.ActionTallyDropped,
 				tags.Denom, denom,
-			)
+			))
 		}
 	}
 
