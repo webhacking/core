@@ -67,6 +67,11 @@ func queryTaxRate(ctx sdk.Context, path []string, req abci.RequestQuery, keeper 
 		return nil, sdk.ErrInternal("epoch parameter is not correctly formatted")
 	}
 
+	curEpoch := util.GetEpoch(ctx)
+	if curEpoch.LT(epoch) {
+		epoch = curEpoch
+	}
+
 	taxRate := keeper.GetTaxRate(ctx, epoch)
 	bz, err := codec.MarshalJSONIndent(keeper.cdc, QueryTaxRateResponse{TaxRate: taxRate})
 	if err != nil {
@@ -115,11 +120,14 @@ func queryIssuance(ctx sdk.Context, path []string, req abci.RequestQuery, keeper
 		dayStr = path[1]
 	}
 
-	var day int64
-	if len(dayStr) == 0 {
-		day = ctx.BlockHeight() / util.BlocksPerDay
-	} else {
+	curDay := ctx.BlockHeight() / util.BlocksPerDay
+	day := curDay
+	if len(dayStr) != 0 {
 		day, _ = strconv.ParseInt(dayStr, 10, 64)
+
+		if curDay < day {
+			day = curDay
+		}
 	}
 
 	issuance := keeper.mtk.GetIssuance(ctx, denom, sdk.NewInt(day))
@@ -147,6 +155,11 @@ func queryMiningRewardWeight(ctx sdk.Context, path []string, req abci.RequestQue
 		return nil, sdk.ErrInternal("epoch parameter is not correctly formatted")
 	}
 
+	curEpoch := util.GetEpoch(ctx)
+	if curEpoch.LT(epoch) {
+		epoch = curEpoch
+	}
+
 	rewardWeight := keeper.GetRewardWeight(ctx, epoch)
 	bz, err := codec.MarshalJSONIndent(keeper.cdc, QueryMiningRewardWeightResponse{RewardWeight: rewardWeight})
 	if err != nil {
@@ -172,6 +185,11 @@ func queryTaxProceeds(ctx sdk.Context, path []string, req abci.RequestQuery, kee
 		return nil, sdk.ErrInternal("epoch parameter is not correctly formatted")
 	}
 
+	curEpoch := util.GetEpoch(ctx)
+	if curEpoch.LT(epoch) {
+		epoch = curEpoch
+	}
+
 	pool := keeper.PeekTaxProceeds(ctx, epoch)
 	bz, err := codec.MarshalJSONIndent(keeper.cdc, QueryTaxProceedsResponse{TaxProceeds: pool})
 	if err != nil {
@@ -195,6 +213,11 @@ func querySeigniorageProceeds(ctx sdk.Context, path []string, req abci.RequestQu
 	epoch, ok := sdk.NewIntFromString(path[0])
 	if !ok {
 		return nil, sdk.ErrInternal("epoch parameter is not correctly formatted")
+	}
+
+	curEpoch := util.GetEpoch(ctx)
+	if curEpoch.LT(epoch) {
+		epoch = curEpoch
 	}
 
 	pool := keeper.mtk.PeekEpochSeigniorage(ctx, epoch)
