@@ -145,12 +145,12 @@ func EndBlocker(ctx sdk.Context, k Keeper) (resTags sdk.Tags) {
 				tags.Denom, denom,
 				tags.Price, mod.String(),
 			))
-		} else {
+		} /* else {
 			resTags = resTags.AppendTags(sdk.NewTags(
 				tags.Action, tags.ActionTallyDropped,
 				tags.Denom, denom,
 			))
-		}
+		} */
 	}
 
 	// Clear all prevotes
