@@ -1,6 +1,7 @@
 package treasury
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -115,6 +116,12 @@ func (r QueryIssuanceResponse) String() (out string) {
 // nolint: unparam
 func queryIssuance(ctx sdk.Context, path []string, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
 	denom := path[0]
+
+	tmpCoins := sdk.NewCoins(sdk.NewCoin(denom, sdk.OneInt()))
+	if !tmpCoins.IsValid() {
+		return nil, sdk.ErrInternal(fmt.Sprintf("%s Invalid Denom", denom))
+	}
+
 	var dayStr string
 	if len(path) == 2 {
 		dayStr = path[1]
