@@ -7,8 +7,9 @@ require (
 	github.com/btcsuite/btcutil v0.0.0-20190316010144-3ac1210f4b38 // indirect
 	github.com/cosmos/cosmos-sdk v0.0.0-00010101000000-000000000000
 	github.com/cosmos/go-bip39 v0.0.0-20180819234021-555e2067c45d // indirect
-	github.com/golangci/golangci-lint v1.17.1 // indirect
+	github.com/golang/protobuf v1.3.2 // indirect
 	github.com/gorilla/mux v1.7.0
+	github.com/kr/pretty v0.1.0 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/prometheus/client_golang v0.9.3 // indirect
 	github.com/rakyll/statik v0.1.6
@@ -17,9 +18,15 @@ require (
 	github.com/spf13/pflag v1.0.3
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.3.0
+	github.com/syndtr/goleveldb v1.0.1-0.20190318030020-c3a204f8e965 // indirect
 	github.com/tendermint/go-amino v0.14.1
 	github.com/tendermint/tendermint v0.31.5
-	github.com/tendermint/tm-db v0.1.1 // indirect
+	golang.org/x/crypto v0.0.0-20190313024323-a1f597ede03a // indirect
+	golang.org/x/net v0.0.0-20190628185345-da137c7871d7 // indirect
+	golang.org/x/sys v0.0.0-20190312061237-fead79001313 // indirect
+	google.golang.org/genproto v0.0.0-20181029155118-b69ba1387ce2 // indirect
+	google.golang.org/grpc v1.22.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )
 
 replace github.com/cosmos/cosmos-sdk => github.com/YunSuk-Yeo/cosmos-sdk v0.35.1-terra

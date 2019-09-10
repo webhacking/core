@@ -1,0 +1,166 @@
+Allocating 12 workers...
+[W6] Worker is up and running
+[W10] Worker is up and running
+[W2] Worker is up and running
+[W5] Worker is up and running
+[W4] Worker is up and running
+[W1] Worker is up and running
+[W8] Worker is up and running
+[W11] Worker is up and running
+[W0] Worker is up and running
+[W9] Worker is up and running
+[W7] Worker is up and running
+[W3] Worker is up and running
+[W10] Spawned simulation with pid 25255 [seed=2 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-2-date-09-10-2019_155040.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-2-date-09-10-2019_155040.stderr]
+[W1] Spawned simulation with pid 25256 [seed=123 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-123-date-09-10-2019_155040.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-123-date-09-10-2019_155040.stderr]
+[W9] Spawned simulation with pid 25257 [seed=2989 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-2989-date-09-10-2019_155040.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-2989-date-09-10-2019_155040.stderr]
+[W4] Spawned simulation with pid 25258 [seed=32 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-32-date-09-10-2019_155040.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-32-date-09-10-2019_155040.stderr]
+[W7] Spawned simulation with pid 25264 [seed=3012 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-3012-date-09-10-2019_155040.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-3012-date-09-10-2019_155040.stderr]
+[W2] Spawned simulation with pid 25259 [seed=4 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-4-date-09-10-2019_155040.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-4-date-09-10-2019_155040.stderr]
+[W0] Spawned simulation with pid 25260 [seed=1893 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-1893-date-09-10-2019_155040.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-1893-date-09-10-2019_155040.stderr]
+[W6] Spawned simulation with pid 25261 [seed=1 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-1-date-09-10-2019_155040.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-1-date-09-10-2019_155040.stderr]
+[W8] Spawned simulation with pid 25262 [seed=124 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-124-date-09-10-2019_155040.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-124-date-09-10-2019_155040.stderr]
+[W5] Spawned simulation with pid 25263 [seed=7 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-7-date-09-10-2019_155040.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-7-date-09-10-2019_155040.stderr]
+[W3] Spawned simulation with pid 25265 [seed=4728 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-4728-date-09-10-2019_155040.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-4728-date-09-10-2019_155040.stderr]
+[W11] Spawned simulation with pid 25266 [seed=582 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-582-date-09-10-2019_155040.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-582-date-09-10-2019_155040.stderr]
+[W11] Seed 582: OK
+[W11] Spawned simulation with pid 25617 [seed=37827 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-37827-date-09-10-2019_155100.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-37827-date-09-10-2019_155100.stderr]
+[W6] Seed 1: OK
+[W6] Spawned simulation with pid 25641 [seed=981928 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-981928-date-09-10-2019_155104.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-981928-date-09-10-2019_155104.stderr]
+[W9] Seed 2989: OK
+[W9] Spawned simulation with pid 25663 [seed=87821 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-87821-date-09-10-2019_155105.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-87821-date-09-10-2019_155105.stderr]
+[W8] Seed 124: OK
+[W8] Spawned simulation with pid 25691 [seed=891823782 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-891823782-date-09-10-2019_155119.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-891823782-date-09-10-2019_155119.stderr]
+[W7] Seed 3012: OK
+[W7] Spawned simulation with pid 25717 [seed=989182 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-989182-date-09-10-2019_155145.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-989182-date-09-10-2019_155145.stderr]
+[W5] Seed 7: OK
+[W5] Spawned simulation with pid 25756 [seed=89182391 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-89182391-date-09-10-2019_155206.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-89182391-date-09-10-2019_155206.stderr]
+[W9] Seed 87821: OK
+[W9] Spawned simulation with pid 25787 [seed=11 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-11-date-09-10-2019_155222.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-11-date-09-10-2019_155222.stderr]
+[W2] Seed 4: OK
+[W2] Spawned simulation with pid 25814 [seed=22 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-22-date-09-10-2019_155234.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-22-date-09-10-2019_155234.stderr]
+[W9] Seed 11: OK
+[W9] Spawned simulation with pid 25841 [seed=44 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-44-date-09-10-2019_155240.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-44-date-09-10-2019_155240.stderr]
+[W0] Seed 1893: OK
+[W0] Spawned simulation with pid 25865 [seed=77 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-77-date-09-10-2019_155244.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-77-date-09-10-2019_155244.stderr]
+[W7] Seed 989182: OK
+[W7] Spawned simulation with pid 25895 [seed=99 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-99-date-09-10-2019_155302.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/604214285/app-simulation-seed-99-date-09-10-2019_155302.stderr]
+Draining seeds queue...
+2020
+3232
+123123
+124124
+582582
+18931893
+29892989
+30123012
+47284728
+7601778
+8090485
+977367484
+491163361
+424254581
+673398983
+Kill all remaining processes...
+wrong number of arguments
+wrong number of arguments
+wrong number of arguments
+wrong number of arguments
+Allocating 12 workers...
+[W1] Worker is up and running
+[W5] Worker is up and running
+[W8] Worker is up and running
+[W3] Worker is up and running
+[W10] Worker is up and running
+[W2] Worker is up and running
+[W11] Worker is up and running
+[W4] Worker is up and running
+[W7] Worker is up and running
+[W0] Worker is up and running
+[W6] Worker is up and running
+[W9] Worker is up and running
+[W5] Spawned simulation with pid 26652 [seed=2 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-2-date-09-10-2019_160558.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-2-date-09-10-2019_160558.stderr]
+[W2] Spawned simulation with pid 26654 [seed=123 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-123-date-09-10-2019_160558.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-123-date-09-10-2019_160558.stderr]
+[W8] Spawned simulation with pid 26653 [seed=4 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-4-date-09-10-2019_160558.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-4-date-09-10-2019_160558.stderr]
+[W3] Spawned simulation with pid 26655 [seed=7 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-7-date-09-10-2019_160558.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-7-date-09-10-2019_160558.stderr]
+[W4] Spawned simulation with pid 26657 [seed=582 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-582-date-09-10-2019_160558.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-582-date-09-10-2019_160558.stderr]
+[W1] Spawned simulation with pid 26656 [seed=1 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-1-date-09-10-2019_160558.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-1-date-09-10-2019_160558.stderr]
+[W11] Spawned simulation with pid 26658 [seed=124 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-124-date-09-10-2019_160558.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-124-date-09-10-2019_160558.stderr]
+[W9] Spawned simulation with pid 26659 [seed=4728 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-4728-date-09-10-2019_160558.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-4728-date-09-10-2019_160558.stderr]
+[W7] Spawned simulation with pid 26660 [seed=1893 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-1893-date-09-10-2019_160558.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-1893-date-09-10-2019_160558.stderr]
+[W10] Spawned simulation with pid 26662 [seed=32 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-32-date-09-10-2019_160558.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-32-date-09-10-2019_160558.stderr]
+[W0] Spawned simulation with pid 26663 [seed=2989 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-2989-date-09-10-2019_160558.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-2989-date-09-10-2019_160558.stderr]
+[W6] Spawned simulation with pid 26664 [seed=3012 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-3012-date-09-10-2019_160558.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/025478998/app-simulation-seed-3012-date-09-10-2019_160558.stderr]
+Draining seeds queue...
+37827
+981928
+87821
+891823782
+989182
+89182391
+11
+22
+44
+77
+99
+2020
+3232
+123123
+124124
+582582
+18931893
+29892989
+30123012
+47284728
+7601778
+8090485
+977367484
+491163361
+424254581
+673398983
+Kill all remaining processes...
+Allocating 4 workers...
+[W2] Worker is up and running
+[W1] Worker is up and running
+[W3] Worker is up and running
+[W0] Worker is up and running
+[W2] Spawned simulation with pid 26805 [seed=1 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/127579947/app-simulation-seed-1-date-09-10-2019_160618.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/127579947/app-simulation-seed-1-date-09-10-2019_160618.stderr]
+[W1] Spawned simulation with pid 26806 [seed=2 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/127579947/app-simulation-seed-2-date-09-10-2019_160618.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/127579947/app-simulation-seed-2-date-09-10-2019_160618.stderr]
+[W0] Spawned simulation with pid 26807 [seed=7 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/127579947/app-simulation-seed-7-date-09-10-2019_160618.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/127579947/app-simulation-seed-7-date-09-10-2019_160618.stderr]
+[W3] Spawned simulation with pid 26808 [seed=4 stdout=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/127579947/app-simulation-seed-4-date-09-10-2019_160618.stdout stderr=/var/folders/dk/fbl2ys911_gbfxmfq3h96d0m0000gn/T/127579947/app-simulation-seed-4-date-09-10-2019_160618.stderr]
+Draining seeds queue...
+32
+123
+124
+582
+1893
+2989
+3012
+4728
+37827
+981928
+87821
+891823782
+989182
+89182391
+11
+22
+44
+77
+99
+2020
+3232
+123123
+124124
+582582
+18931893
+29892989
+30123012
+47284728
+7601778
+8090485
+977367484
+491163361
+424254581
+673398983
+Kill all remaining processes...

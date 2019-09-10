@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"sort"
+	"time"
 
 	"github.com/terra-project/core/types"
 	"github.com/terra-project/core/types/assets"
@@ -347,7 +348,7 @@ func (app *TerraApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.
 	}
 
 	if app.ranking && ctx.BlockHeight()%util.BlocksPerDay == 0 {
-		go app.exportRanking(ctx)
+		go app.exportRanking(ctx, []string{assets.MicroLunaDenom, assets.MicroKRWDenom, assets.MicroSDRDenom, assets.MicroUSDDenom})
 	}
 
 	return abci.ResponseEndBlock{
@@ -356,38 +357,49 @@ func (app *TerraApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.
 	}
 }
 
-func (app TerraApp) exportRanking(ctx sdk.Context) {
+func (app TerraApp) exportRanking(ctx sdk.Context, denoms []string) {
 	app.Logger().Info("Start Tracking Top 1000 Rankers")
 	accs := app.accountKeeper.GetAllAccounts(ctx)
 
-	var topRankerList []auth.Account
-	var topRanker auth.Account
-	var topRankerIdx int
-
 	maxEntries := 1000
-	for i := 0; i < maxEntries; i++ {
-		topRankerAmt := topRanker.GetCoins().AmountOf(assets.MicroLunaDenom)
-		for idx, acc := range accs {
-			amt := acc.GetCoins().AmountOf(assets.MicroLunaDenom)
-			if topRanker == nil || amt.GT(topRankerAmt) {
-				topRankerAmt = amt
-				topRankerIdx = idx
+	if len(accs) < maxEntries {
+		maxEntries = len(accs)
+	}
+
+	for _, denom := range denoms {
+
+		var topRankerList []auth.Account
+
+		tmpAccs := make([]auth.Account, len(accs))
+		copy(tmpAccs, accs)
+
+		for i := 0; i < maxEntries; i++ {
+
+			var topRankerAmt sdk.Int
+			var topRankerIdx int
+
+			for idx, acc := range tmpAccs {
+				amt := acc.GetCoins().AmountOf(denom)
+				if idx == 0 || amt.GT(topRankerAmt) {
+					topRankerAmt = amt
+					topRankerIdx = idx
+				}
 			}
+
+			topRankerList = append(topRankerList, tmpAccs[topRankerIdx])
+			tmpAccs[topRankerIdx] = tmpAccs[len(tmpAccs)-1]
+			tmpAccs = tmpAccs[:len(tmpAccs)-1]
 		}
 
-		topRankerList = append(topRankerList, accs[topRankerIdx])
-		accs[topRankerIdx] = accs[len(accs)-1]
-		accs = accs[:len(accs)-1]
-	}
+		bz, err := codec.MarshalJSONIndent(app.cdc, topRankerList)
+		if err != nil {
+			app.Logger().Error(err.Error())
+		}
 
-	bz, err := codec.MarshalJSONIndent(app.cdc, topRankerList)
-	if err != nil {
-		app.Logger().Error(err.Error())
-	}
-
-	err = ioutil.WriteFile("/tmp/terrad/ranking.json", bz, 0644)
-	if err != nil {
-		app.Logger().Error(err.Error())
+		err = ioutil.WriteFile(fmt.Sprintf("/tmp/ranking-%s-%s.json", denom, time.Now().Format(time.RFC3339)), bz, 0644)
+		if err != nil {
+			app.Logger().Error(err.Error())
+		}
 	}
 
 	app.Logger().Info("End Tracking Top 1000 Rankers")
