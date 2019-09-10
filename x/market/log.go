@@ -9,8 +9,8 @@ const (
 	LogKeySwapCoin = string("swap_coin")
 	// LogKeySwapFee is the fee for swap operation
 	LogKeySwapFee = string("swap_fee")
-        // LogKeyOfferCoin no-lint
-        LogKeyOfferCoin = string("offer_coin")
+	// LogKeyOfferCoin no-lint
+	LogKeyOfferCoin = string("offer_coin")
 )
 
 // Log is map type object to organize msg result

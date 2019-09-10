@@ -17,10 +17,9 @@ require (
 	github.com/spf13/pflag v1.0.3
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.3.0
-	github.com/syndtr/goleveldb v1.0.0 // indirect
 	github.com/tendermint/go-amino v0.14.1
 	github.com/tendermint/tendermint v0.31.5
-	google.golang.org/grpc v1.21.0 // indirect
+	github.com/tendermint/tm-db v0.1.1 // indirect
 )
 
 replace github.com/cosmos/cosmos-sdk => github.com/YunSuk-Yeo/cosmos-sdk v0.35.1-terra

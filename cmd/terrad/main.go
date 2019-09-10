@@ -29,8 +29,10 @@ import (
 )
 
 const flagAssertInvariantsBlockly = "assert-invariants-blockly"
+const flagRanking = "ranking"
 
 var assertInvariantsBlockly bool
+var ranking bool
 
 func main() {
 	cdc := app.MakeCodec()
@@ -67,6 +69,16 @@ func main() {
 	executor := cli.PrepareBaseCmd(rootCmd, "TE", app.DefaultNodeHome)
 	rootCmd.PersistentFlags().BoolVar(&assertInvariantsBlockly, flagAssertInvariantsBlockly,
 		false, "Assert registered invariants on a blockly basis")
+
+	cmds := rootCmd.Commands()
+	for _, cmd := range cmds {
+		if cmd.Name() == "start" {
+			cmd.PersistentFlags().BoolVar(&ranking, flagRanking,
+				false, "Specify flag if you want to left ranking.json to /tmp/terrad dir")
+			break
+		}
+	}
+
 	err := executor.Execute()
 	if err != nil {
 		// handle with #870
@@ -76,7 +88,7 @@ func main() {
 
 func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer) abci.Application {
 	return app.NewTerraApp(
-		logger, db, traceStore, true, assertInvariantsBlockly,
+		logger, db, traceStore, true, assertInvariantsBlockly, ranking,
 		baseapp.SetPruning(store.NewPruningOptionsFromString(viper.GetString("pruning"))),
 		baseapp.SetMinGasPrices(viper.GetString(server.FlagMinGasPrices)),
 	)
@@ -86,13 +98,13 @@ func exportAppStateAndTMValidators(
 	logger log.Logger, db dbm.DB, traceStore io.Writer, height int64, forZeroHeight bool, jailWhiteList []string,
 ) (json.RawMessage, []tmtypes.GenesisValidator, error) {
 	if height != -1 {
-		tApp := app.NewTerraApp(logger, db, traceStore, false, false)
+		tApp := app.NewTerraApp(logger, db, traceStore, false, false, false)
 		err := tApp.LoadHeight(height)
 		if err != nil {
 			return nil, nil, err
 		}
 		return tApp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
 	}
-	tApp := app.NewTerraApp(logger, db, traceStore, true, false)
+	tApp := app.NewTerraApp(logger, db, traceStore, true, false, false)
 	return tApp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
 }

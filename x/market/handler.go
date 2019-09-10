@@ -62,7 +62,7 @@ func handleMsgSwap(ctx sdk.Context, k Keeper, msg MsgSwap) sdk.Result {
 	log := NewLog()
 	log = log.append(LogKeySwapCoin, swapCoin.String())
 	log = log.append(LogKeySwapFee, swapFee.String())
-        log = log.append(LogKeyOfferCoin, msg.OfferCoin.String())
+	log = log.append(LogKeyOfferCoin, msg.OfferCoin.String())
 
 	return sdk.Result{
 		Tags: sdk.NewTags(

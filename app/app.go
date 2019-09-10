@@ -3,10 +3,13 @@ package app
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"sort"
 
 	"github.com/terra-project/core/types"
+	"github.com/terra-project/core/types/assets"
+	"github.com/terra-project/core/types/util"
 	"github.com/terra-project/core/update"
 	"github.com/terra-project/core/version"
 	"github.com/terra-project/core/x/budget"
@@ -15,8 +18,6 @@ import (
 	"github.com/terra-project/core/x/oracle"
 	"github.com/terra-project/core/x/pay"
 	"github.com/terra-project/core/x/treasury"
-
-	"github.com/terra-project/core/types/assets"
 
 	tdistr "github.com/terra-project/core/x/distribution"
 	tslashing "github.com/terra-project/core/x/slashing"
@@ -60,6 +61,7 @@ type TerraApp struct {
 	cdc *codec.Codec
 
 	assertInvariantsBlockly bool
+	ranking                 bool
 
 	// keys to access the substores
 	keyMain          *sdk.KVStoreKey
@@ -95,7 +97,7 @@ type TerraApp struct {
 }
 
 // NewTerraApp returns a reference to an initialized TerraApp.
-func NewTerraApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest, assertInvariantsBlockly bool, baseAppOptions ...func(*bam.BaseApp)) *TerraApp {
+func NewTerraApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest, assertInvariantsBlockly, ranking bool, baseAppOptions ...func(*bam.BaseApp)) *TerraApp {
 	cdc := MakeCodec()
 
 	bApp := bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(cdc), baseAppOptions...)
@@ -105,6 +107,7 @@ func NewTerraApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest,
 		BaseApp:                 bApp,
 		cdc:                     cdc,
 		assertInvariantsBlockly: assertInvariantsBlockly,
+		ranking:                 ranking,
 		keyMain:                 sdk.NewKVStoreKey(bam.MainStoreKey),
 		keyAccount:              sdk.NewKVStoreKey(auth.StoreKey),
 		keyStaking:              sdk.NewKVStoreKey(staking.StoreKey),
@@ -343,10 +346,51 @@ func (app *TerraApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.
 		app.assertRuntimeInvariants()
 	}
 
+	if app.ranking && ctx.BlockHeight()%util.BlocksPerDay == 0 {
+		go app.exportRanking(ctx)
+	}
+
 	return abci.ResponseEndBlock{
 		ValidatorUpdates: validatorUpdates,
 		Tags:             tags,
 	}
+}
+
+func (app TerraApp) exportRanking(ctx sdk.Context) {
+	app.Logger().Info("Start Tracking Top 1000 Rankers")
+	accs := app.accountKeeper.GetAllAccounts(ctx)
+
+	var topRankerList []auth.Account
+	var topRanker auth.Account
+	var topRankerIdx int
+
+	maxEntries := 1000
+	for i := 0; i < maxEntries; i++ {
+		topRankerAmt := topRanker.GetCoins().AmountOf(assets.MicroLunaDenom)
+		for idx, acc := range accs {
+			amt := acc.GetCoins().AmountOf(assets.MicroLunaDenom)
+			if topRanker == nil || amt.GT(topRankerAmt) {
+				topRankerAmt = amt
+				topRankerIdx = idx
+			}
+		}
+
+		topRankerList = append(topRankerList, accs[topRankerIdx])
+		accs[topRankerIdx] = accs[len(accs)-1]
+		accs = accs[:len(accs)-1]
+	}
+
+	bz, err := codec.MarshalJSONIndent(app.cdc, topRankerList)
+	if err != nil {
+		app.Logger().Error(err.Error())
+	}
+
+	err = ioutil.WriteFile("/tmp/terrad/ranking.json", bz, 0644)
+	if err != nil {
+		app.Logger().Error(err.Error())
+	}
+
+	app.Logger().Info("End Tracking Top 1000 Rankers")
 }
 
 // initialize store from a genesis state
