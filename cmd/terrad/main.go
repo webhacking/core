@@ -29,10 +29,10 @@ import (
 )
 
 const flagAssertInvariantsBlockly = "assert-invariants-blockly"
-const flagRanking = "ranking"
+const flagTracking = "tracking"
 
 var assertInvariantsBlockly bool
-var ranking bool
+var tracking bool
 
 func main() {
 	cdc := app.MakeCodec()
@@ -73,8 +73,8 @@ func main() {
 	cmds := rootCmd.Commands()
 	for _, cmd := range cmds {
 		if cmd.Name() == "start" {
-			cmd.PersistentFlags().BoolVar(&ranking, flagRanking,
-				false, "Specify flag if you want to left ranking.json to /tmp/terrad dir")
+			cmd.PersistentFlags().BoolVar(&tracking, flagTracking,
+				false, "Specify flag if you want to left tracking.json to /tmp/terrad dir")
 			break
 		}
 	}
@@ -88,7 +88,7 @@ func main() {
 
 func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer) abci.Application {
 	return app.NewTerraApp(
-		logger, db, traceStore, true, assertInvariantsBlockly, ranking,
+		logger, db, traceStore, true, assertInvariantsBlockly, tracking,
 		baseapp.SetPruning(store.NewPruningOptionsFromString(viper.GetString("pruning"))),
 		baseapp.SetMinGasPrices(viper.GetString(server.FlagMinGasPrices)),
 	)

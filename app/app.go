@@ -62,7 +62,7 @@ type TerraApp struct {
 	cdc *codec.Codec
 
 	assertInvariantsBlockly bool
-	ranking                 bool
+	tracking                bool
 
 	// keys to access the substores
 	keyMain          *sdk.KVStoreKey
@@ -98,7 +98,7 @@ type TerraApp struct {
 }
 
 // NewTerraApp returns a reference to an initialized TerraApp.
-func NewTerraApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest, assertInvariantsBlockly, ranking bool, baseAppOptions ...func(*bam.BaseApp)) *TerraApp {
+func NewTerraApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest, assertInvariantsBlockly, tracking bool, baseAppOptions ...func(*bam.BaseApp)) *TerraApp {
 	cdc := MakeCodec()
 
 	bApp := bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(cdc), baseAppOptions...)
@@ -108,7 +108,7 @@ func NewTerraApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest,
 		BaseApp:                 bApp,
 		cdc:                     cdc,
 		assertInvariantsBlockly: assertInvariantsBlockly,
-		ranking:                 ranking,
+		tracking:                tracking,
 		keyMain:                 sdk.NewKVStoreKey(bam.MainStoreKey),
 		keyAccount:              sdk.NewKVStoreKey(auth.StoreKey),
 		keyStaking:              sdk.NewKVStoreKey(staking.StoreKey),
@@ -347,8 +347,12 @@ func (app *TerraApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.
 		app.assertRuntimeInvariants()
 	}
 
-	if app.ranking && ctx.BlockHeight()%util.BlocksPerDay == 0 {
-		go app.exportRanking(ctx, []string{assets.MicroLunaDenom, assets.MicroKRWDenom, assets.MicroSDRDenom, assets.MicroUSDDenom})
+	if app.tracking && ctx.BlockHeight()%util.BlocksPerDay == 0 {
+		accs := app.accountKeeper.GetAllAccounts(ctx)
+		go app.exportVestingSupply(ctx, accs)
+
+		denoms := []string{assets.MicroLunaDenom, assets.MicroKRWDenom, assets.MicroSDRDenom, assets.MicroUSDDenom}
+		go app.exportRanking(ctx, accs, denoms)
 	}
 
 	return abci.ResponseEndBlock{
@@ -357,9 +361,32 @@ func (app *TerraApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.
 	}
 }
 
-func (app TerraApp) exportRanking(ctx sdk.Context, denoms []string) {
+func (app TerraApp) exportVestingSupply(ctx sdk.Context, accs []auth.Account) {
+	app.Logger().Info("Start Tracking Vesting Luna Supply")
+	vestingAmount := sdk.ZeroInt()
+	for _, acc := range accs {
+		vacc, ok := acc.(auth.VestingAccount)
+		if ok {
+			vestingCoins := vacc.GetVestingCoins(ctx.BlockHeader().Time)
+			vestingAmount = vestingAmount.Add(vestingCoins.AmountOf(assets.MicroLunaDenom))
+		}
+	}
+
+	bz, err := codec.MarshalJSONIndent(app.cdc, vestingAmount)
+	if err != nil {
+		app.Logger().Error(err.Error())
+	}
+
+	err = ioutil.WriteFile(fmt.Sprintf("/tmp/vesting-%s.json", time.Now().Format(time.RFC3339)), bz, 0644)
+	if err != nil {
+		app.Logger().Error(err.Error())
+	}
+
+	app.Logger().Info("End Tracking Vesting Luna Supply")
+}
+
+func (app TerraApp) exportRanking(ctx sdk.Context, accs []auth.Account, denoms []string) {
 	app.Logger().Info("Start Tracking Top 1000 Rankers")
-	accs := app.accountKeeper.GetAllAccounts(ctx)
 
 	maxEntries := 1000
 	if len(accs) < maxEntries {
@@ -396,7 +423,7 @@ func (app TerraApp) exportRanking(ctx sdk.Context, denoms []string) {
 			app.Logger().Error(err.Error())
 		}
 
-		err = ioutil.WriteFile(fmt.Sprintf("/tmp/ranking-%s-%s.json", denom, time.Now().Format(time.RFC3339)), bz, 0644)
+		err = ioutil.WriteFile(fmt.Sprintf("/tmp/tracking-%s-%s.json", denom, time.Now().Format(time.RFC3339)), bz, 0644)
 		if err != nil {
 			app.Logger().Error(err.Error())
 		}
