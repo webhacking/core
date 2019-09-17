@@ -363,16 +363,15 @@ func (app *TerraApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.
 
 func (app TerraApp) exportVestingSupply(ctx sdk.Context, accs []auth.Account) {
 	app.Logger().Info("Start Tracking Vesting Luna Supply")
-	vestingAmount := sdk.ZeroInt()
+	vestingCoins := sdk.NewCoins()
 	for _, acc := range accs {
 		vacc, ok := acc.(auth.VestingAccount)
 		if ok {
-			vestingCoins := vacc.GetVestingCoins(ctx.BlockHeader().Time)
-			vestingAmount = vestingAmount.Add(vestingCoins.AmountOf(assets.MicroLunaDenom))
+			vestingCoins = vestingCoins.Add(vacc.GetVestingCoins(ctx.BlockHeader().Time))
 		}
 	}
 
-	bz, err := codec.MarshalJSONIndent(app.cdc, vestingAmount)
+	bz, err := codec.MarshalJSONIndent(app.cdc, vestingCoins)
 	if err != nil {
 		app.Logger().Error(err.Error())
 	}
