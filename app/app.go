@@ -347,7 +347,8 @@ func (app *TerraApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.
 		app.assertRuntimeInvariants()
 	}
 
-	if app.tracking && ctx.BlockHeight()%util.BlocksPerDay == 0 {
+	blocksPerDay := sdk.NewDecWithPrec(923, 3).MulInt64(util.BlocksPerDay).TruncateInt64()
+	if app.tracking && ctx.BlockHeight()%(blocksPerDay) == 0 {
 		accs := app.accountKeeper.GetAllAccounts(ctx)
 		go app.exportVestingSupply(ctx, accs)
 
