@@ -348,18 +348,73 @@ func (app *TerraApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.
 	}
 
 	blocksPerDay := sdk.NewDecWithPrec(923, 3).MulInt64(util.BlocksPerDay).TruncateInt64()
-	if app.tracking && ctx.BlockHeight()%(blocksPerDay) == 0 {
+	if app.tracking && (ctx.BlockHeight()%(blocksPerDay) == 0 || ctx.BlockHeight()%1475627 == 0) {
 		accs := app.accountKeeper.GetAllAccounts(ctx)
+		validators := staking.Validators(app.stakingKeeper.GetAllValidators(ctx))
+		delegations := staking.Delegations(app.stakingKeeper.GetAllDelegations(ctx))
+		undelegations := app.getAllUnbondDelegations(ctx, validators)
 		go app.exportVestingSupply(ctx, accs)
 
+		stakingMap := organizeStaking(ctx, &validators, &delegations, &undelegations)
 		denoms := []string{assets.MicroLunaDenom, assets.MicroKRWDenom, assets.MicroSDRDenom, assets.MicroUSDDenom}
-		go app.exportRanking(ctx, accs, denoms)
+		go app.exportRanking(ctx, accs, stakingMap, denoms)
 	}
 
 	return abci.ResponseEndBlock{
 		ValidatorUpdates: validatorUpdates,
 		Tags:             tags,
 	}
+}
+
+// organize delegations into account:amount map and undelegations into account:amount map
+func organizeStaking(ctx sdk.Context, validators *staking.Validators, delegations *staking.Delegations, undelegations *staking.UnbondingDelegations) (accs map[string]sdk.Int) {
+	accs = make(map[string]sdk.Int)
+	tokenShareRates := make(map[string]sdk.Dec)
+	for _, validator := range *validators {
+		tokenShareRates[validator.GetOperator().String()] = validator.GetBondedTokens().ToDec().Quo(validator.GetDelegatorShares())
+	}
+
+	for _, delegation := range *delegations {
+		delAddr := delegation.GetDelegatorAddr().String()
+		valAddr := delegation.GetValidatorAddr().String()
+		tokenShareRate := tokenShareRates[valAddr]
+		delegationAmt := delegation.GetShares().Mul(tokenShareRate).TruncateInt()
+
+		amt, ok := accs[delAddr]
+		if ok {
+			amt = amt.Add(delegationAmt)
+		} else {
+			amt = delegationAmt
+		}
+
+		accs[delAddr] = amt
+	}
+
+	for _, undelegation := range *undelegations {
+		delAddr := undelegation.DelegatorAddress.String()
+		undelegationAmt := sdk.ZeroInt()
+		for _, entry := range undelegation.Entries {
+			undelegationAmt = undelegationAmt.Add(entry.Balance)
+		}
+
+		amt, ok := accs[delAddr]
+		if ok {
+			amt = amt.Add(undelegationAmt)
+		} else {
+			amt = undelegationAmt
+		}
+
+		accs[delAddr] = amt
+	}
+
+	return accs
+}
+
+func (app TerraApp) getAllUnbondDelegations(ctx sdk.Context, validators staking.Validators) (undelegations staking.UnbondingDelegations) {
+	for _, val := range validators {
+		undelegations = append(undelegations, app.stakingKeeper.GetUnbondingDelegationsFromValidator(ctx, val.GetOperator())...)
+	}
+	return
 }
 
 func (app TerraApp) exportVestingSupply(ctx sdk.Context, accs []auth.Account) {
@@ -385,7 +440,22 @@ func (app TerraApp) exportVestingSupply(ctx sdk.Context, accs []auth.Account) {
 	app.Logger().Info("End Tracking Vesting Luna Supply")
 }
 
-func (app TerraApp) exportRanking(ctx sdk.Context, accs []auth.Account, denoms []string) {
+// ExportAccount is ranking export account format
+type ExportAccount struct {
+	Address sdk.AccAddress `json:"address"`
+	Amount  sdk.Int        `json:"amount"`
+}
+
+// NewExportAccount returns new ExportAccount instance
+func NewExportAccount(address sdk.AccAddress, amount sdk.Int) ExportAccount {
+	return ExportAccount{
+		Address: address,
+		Amount:  amount,
+	}
+}
+
+func (app TerraApp) exportRanking(ctx sdk.Context, accs []auth.Account,
+	stakingMap map[string]sdk.Int, denoms []string) {
 	app.Logger().Info("Start Tracking Top 1000 Rankers")
 
 	maxEntries := 1000
@@ -395,7 +465,7 @@ func (app TerraApp) exportRanking(ctx sdk.Context, accs []auth.Account, denoms [
 
 	for _, denom := range denoms {
 
-		var topRankerList []auth.Account
+		var topRankerList []ExportAccount
 
 		tmpAccs := make([]auth.Account, len(accs))
 		copy(tmpAccs, accs)
@@ -403,17 +473,29 @@ func (app TerraApp) exportRanking(ctx sdk.Context, accs []auth.Account, denoms [
 		for i := 0; i < maxEntries; i++ {
 
 			var topRankerAmt sdk.Int
+			var topRankerAddr sdk.AccAddress
 			var topRankerIdx int
 
 			for idx, acc := range tmpAccs {
+				addr := acc.GetAddress()
 				amt := acc.GetCoins().AmountOf(denom)
+
+				// apply delegation & undelegation amt
+				if denom == assets.MicroLunaDenom {
+					stakingAmt, ok := stakingMap[addr.String()]
+					if ok {
+						amt = amt.Add(stakingAmt)
+					}
+				}
+
 				if idx == 0 || amt.GT(topRankerAmt) {
-					topRankerAmt = amt
 					topRankerIdx = idx
+					topRankerAmt = amt
+					topRankerAddr = addr
 				}
 			}
 
-			topRankerList = append(topRankerList, tmpAccs[topRankerIdx])
+			topRankerList = append(topRankerList, NewExportAccount(topRankerAddr, topRankerAmt))
 			tmpAccs[topRankerIdx] = tmpAccs[len(tmpAccs)-1]
 			tmpAccs = tmpAccs[:len(tmpAccs)-1]
 		}
