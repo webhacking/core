@@ -1,3 +1,16 @@
+# Changelog
+
+## 0.2.5
+
+* Bump Tendermint version to v0.31.10 to address the p2p panic errors.
+
+## 0.2.4
+
+### Bug Fixes
+
+ * Bump Tendermint version to v0.31.9 to fix the p2p panic error.
+ * Add terrareplay
+
 ## 0.2.3
 - [\#187](https://github.com/terra-project/core/pull/187): Change all time instance timezone to UTC to remove gap in time calculation
 
