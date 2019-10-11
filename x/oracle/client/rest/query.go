@@ -161,9 +161,6 @@ func queryFeederDelegationHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext)
 			return
 		}
 
-		var feeder sdk.AccAddress
-		cdc.MustUnmarshalJSON(res, &feeder)
-
 		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent)
 	}
 }
