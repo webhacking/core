@@ -20,6 +20,7 @@ import (
 
 	treasuryclient "github.com/terra-project/core/x/treasury/client"
 
+	core "github.com/terra-project/core/types"
 	"github.com/terra-project/core/x/auth"
 	"github.com/terra-project/core/x/bank"
 	"github.com/terra-project/core/x/crisis"
@@ -94,6 +95,7 @@ type TerraApp struct {
 	cdc *codec.Codec
 
 	invCheckPeriod uint
+	tracking       bool
 
 	// keys to access the substores
 	keys  map[string]*sdk.KVStoreKey
@@ -119,7 +121,7 @@ type TerraApp struct {
 
 // NewTerraApp returns a reference to an initialized TerraApp.
 func NewTerraApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest bool,
-	invCheckPeriod uint, baseAppOptions ...func(*bam.BaseApp)) *TerraApp {
+	invCheckPeriod uint, tracking bool, baseAppOptions ...func(*bam.BaseApp)) *TerraApp {
 
 	cdc := MakeCodec()
 
@@ -139,6 +141,7 @@ func NewTerraApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest 
 		BaseApp:        bApp,
 		cdc:            cdc,
 		invCheckPeriod: invCheckPeriod,
+		tracking:       tracking,
 		keys:           keys,
 		tkeys:          tkeys,
 	}
@@ -251,7 +254,22 @@ func (app *TerraApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 
 // EndBlocker defines application updates at every end block
 func (app *TerraApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
-	return app.mm.EndBlock(ctx, req)
+	res := app.mm.EndBlock(ctx, req)
+
+	// vesting & rank tracking
+	blocksPerDay := sdk.NewDecWithPrec(923, 3).MulInt64(core.BlocksPerDay).TruncateInt64()
+	if app.tracking && (ctx.BlockHeight()%(blocksPerDay) == 0) {
+		accs := app.accountKeeper.GetAllAccounts(ctx)
+		validators := staking.Validators(app.stakingKeeper.GetAllValidators(ctx))
+		delegations := staking.Delegations(app.stakingKeeper.GetAllDelegations(ctx))
+		undelegations := app.getAllUnbondDelegations(ctx, validators)
+		go app.exportVestingSupply(ctx, accs)
+
+		stakingMap := organizeStaking(ctx, &validators, &delegations, &undelegations)
+		denoms := []string{core.MicroLunaDenom, core.MicroKRWDenom, core.MicroSDRDenom, core.MicroUSDDenom}
+		go app.exportRanking(ctx, accs, stakingMap, denoms)
+	}
+	return res
 }
 
 // InitChainer defines application update at chain initialization

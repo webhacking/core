@@ -30,8 +30,10 @@ import (
 
 // terrad custom flags
 const flagInvCheckPeriod = "inv-check-period"
+const flagTracking = "tracking"
 
 var invCheckPeriod uint
+var tracking bool
 
 func main() {
 	cdc := app.MakeCodec()
@@ -68,6 +70,15 @@ func main() {
 	executor := cli.PrepareBaseCmd(rootCmd, "TE", app.DefaultNodeHome)
 	rootCmd.PersistentFlags().UintVar(&invCheckPeriod, flagInvCheckPeriod,
 		0, "Assert registered invariants every N blocks")
+
+	cmds := rootCmd.Commands()
+	for _, cmd := range cmds {
+		if cmd.Name() == "start" {
+			cmd.PersistentFlags().BoolVar(&tracking, flagTracking,
+				false, "Specify flag if you want to left tracking data to /tmp/terrad dir")
+			break
+		}
+	}
 	err := executor.Execute()
 	if err != nil {
 		panic(err)
@@ -76,7 +87,7 @@ func main() {
 
 func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer) abci.Application {
 	return app.NewTerraApp(
-		logger, db, traceStore, true, invCheckPeriod,
+		logger, db, traceStore, true, invCheckPeriod, tracking,
 		baseapp.SetPruning(store.NewPruningOptionsFromString(viper.GetString("pruning"))),
 		baseapp.SetMinGasPrices(viper.GetString(server.FlagMinGasPrices)),
 		baseapp.SetHaltHeight(uint64(viper.GetInt(server.FlagHaltHeight))),
@@ -88,13 +99,13 @@ func exportAppStateAndTMValidators(
 ) (json.RawMessage, []tmtypes.GenesisValidator, error) {
 
 	if height != -1 {
-		tApp := app.NewTerraApp(logger, db, traceStore, false, uint(1))
+		tApp := app.NewTerraApp(logger, db, traceStore, false, uint(1), false)
 		err := tApp.LoadHeight(height)
 		if err != nil {
 			return nil, nil, err
 		}
 		return tApp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
 	}
-	tApp := app.NewTerraApp(logger, db, traceStore, true, uint(1))
+	tApp := app.NewTerraApp(logger, db, traceStore, true, uint(1), false)
 	return tApp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
 }

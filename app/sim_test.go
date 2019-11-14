@@ -469,7 +469,7 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 		db.Close()
 		os.RemoveAll(dir)
 	}()
-	app := NewTerraApp(logger, db, nil, true, 0)
+	app := NewTerraApp(logger, db, nil, true, 0, false)
 
 	// Run randomized simulation
 	// TODO: parameterize numbers, save for a later PR
@@ -539,7 +539,7 @@ func TestFullAppSimulation(t *testing.T) {
 		os.RemoveAll(dir)
 	}()
 
-	app := NewTerraApp(logger, db, nil, true, 0, fauxMerkleModeOpt)
+	app := NewTerraApp(logger, db, nil, true, 0, false, fauxMerkleModeOpt)
 	require.Equal(t, "TerraApp", app.Name())
 
 	// Run randomized simulation
@@ -597,7 +597,7 @@ func TestAppImportExport(t *testing.T) {
 		os.RemoveAll(dir)
 	}()
 
-	app := NewTerraApp(logger, db, nil, true, 0, fauxMerkleModeOpt)
+	app := NewTerraApp(logger, db, nil, true, 0, false, fauxMerkleModeOpt)
 	require.Equal(t, "TerraApp", app.Name())
 
 	// Run randomized simulation
@@ -646,7 +646,7 @@ func TestAppImportExport(t *testing.T) {
 		os.RemoveAll(newDir)
 	}()
 
-	newApp := NewTerraApp(log.NewNopLogger(), newDB, nil, true, 0, fauxMerkleModeOpt)
+	newApp := NewTerraApp(log.NewNopLogger(), newDB, nil, true, 0, false, fauxMerkleModeOpt)
 	require.Equal(t, "TerraApp", newApp.Name())
 
 	var genesisState simapp.GenesisState
@@ -717,7 +717,7 @@ func TestAppSimulationAfterImport(t *testing.T) {
 		os.RemoveAll(dir)
 	}()
 
-	app := NewTerraApp(logger, db, nil, true, 0, fauxMerkleModeOpt)
+	app := NewTerraApp(logger, db, nil, true, 0, false, fauxMerkleModeOpt)
 	require.Equal(t, "TerraApp", app.Name())
 
 	// Run randomized simulation
@@ -775,7 +775,7 @@ func TestAppSimulationAfterImport(t *testing.T) {
 		os.RemoveAll(newDir)
 	}()
 
-	newApp := NewTerraApp(log.NewNopLogger(), newDB, nil, true, 0, fauxMerkleModeOpt)
+	newApp := NewTerraApp(log.NewNopLogger(), newDB, nil, true, 0, false, fauxMerkleModeOpt)
 	require.Equal(t, "TerraApp", newApp.Name())
 	newApp.InitChain(abci.RequestInitChain{
 		AppStateBytes: appState,
@@ -802,7 +802,7 @@ func TestAppStateDeterminism(t *testing.T) {
 		for j := 0; j < numTimesToRunPerSeed; j++ {
 			logger := log.NewNopLogger()
 			db := dbm.NewMemDB()
-			app := NewTerraApp(logger, db, nil, true, 0)
+			app := NewTerraApp(logger, db, nil, true, 0, false)
 
 			// Run randomized simulation
 			simulation.SimulateFromSeed(
@@ -830,7 +830,7 @@ func BenchmarkInvariants(b *testing.B) {
 		os.RemoveAll(dir)
 	}()
 
-	app := NewTerraApp(logger, db, nil, true, 0)
+	app := NewTerraApp(logger, db, nil, true, 0, false)
 	exportParams := exportParamsPath != ""
 
 	// 2. Run parameterized simulation (w/o invariants)

@@ -41,6 +41,6 @@ func NewTerraAppUNSAFE(logger log.Logger, db dbm.DB, traceStore io.Writer, loadL
 	invCheckPeriod uint, baseAppOptions ...func(*baseapp.BaseApp),
 ) (tapp *TerraApp, keyMain, keyStaking *sdk.KVStoreKey, stakingKeeper staking.Keeper) {
 
-	tapp = NewTerraApp(logger, db, traceStore, loadLatest, invCheckPeriod, baseAppOptions...)
+	tapp = NewTerraApp(logger, db, traceStore, loadLatest, invCheckPeriod, false, baseAppOptions...)
 	return tapp, tapp.keys[baseapp.MainStoreKey], tapp.keys[staking.StoreKey], tapp.stakingKeeper
 }

@@ -91,7 +91,7 @@ func replayTxs(rootDir string) error {
 	// Application
 	fmt.Fprintln(os.Stderr, "Creating application")
 	myapp := app.NewTerraApp(
-		ctx.Logger, appDB, traceStoreWriter, true, uint(1),
+		ctx.Logger, appDB, traceStoreWriter, true, uint(1), false,
 		baseapp.SetPruning(store.PruneEverything), // nothing
 	)
 
