@@ -10,7 +10,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	core "github.com/terra-project/core/types"
 	"github.com/terra-project/core/x/oracle"
 	"github.com/terra-project/core/x/slashing"
 	"github.com/terra-project/core/x/staking"
@@ -169,21 +168,26 @@ func (app *TerraApp) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList []s
 	/* Handle oracle state. */
 
 	// Clear all prevotes
-	app.oracleKeeper.IteratePrevotes(ctx, func(prevote oracle.PricePrevote) (stop bool) {
-		app.oracleKeeper.DeletePrevote(ctx, prevote)
+	app.oracleKeeper.IterateExchangeRatePrevotes(ctx, func(prevote oracle.ExchangeRatePrevote) (stop bool) {
+		app.oracleKeeper.DeleteExchangeRatePrevote(ctx, prevote)
 
 		return false
 	})
 
 	// Clear all votes
-	app.oracleKeeper.IterateVotes(ctx, func(vote oracle.PriceVote) (stop bool) {
-		app.oracleKeeper.DeleteVote(ctx, vote)
+	app.oracleKeeper.IterateExchangeRateVotes(ctx, func(vote oracle.ExchangeRateVote) (stop bool) {
+		app.oracleKeeper.DeleteExchangeRateVote(ctx, vote)
 		return false
 	})
 
 	// Clear all prices
-	app.oracleKeeper.IterateLunaPrices(ctx, func(denom string, price sdk.Dec) bool {
-		app.oracleKeeper.DeletePrice(ctx, denom)
+	app.oracleKeeper.IterateLunaExchangeRates(ctx, func(denom string, _ sdk.Dec) bool {
+		app.oracleKeeper.DeleteLunaExchangeRate(ctx, denom)
+		return false
+	})
+
+	app.oracleKeeper.IterateMissCounters(ctx, func(operator sdk.ValAddress, _ int64) bool {
+		app.oracleKeeper.SetMissCounter(ctx, operator, 0)
 		return false
 	})
 
@@ -194,18 +198,10 @@ func (app *TerraApp) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList []s
 
 	/* Handle treasury state. */
 
-	// clear all historical issuance info
-	app.treasuryKeeper.ClearHistoricalIssuance(ctx)
-	// clear all tax proceeds
-	app.treasuryKeeper.ClearTaxProceeds(ctx)
+	// clear all indicators
+	app.treasuryKeeper.ClearTRs(ctx)
+	app.treasuryKeeper.ClearSRs(ctx)
+	app.treasuryKeeper.ClearTSLs(ctx)
 
-	// left last tax rate
-	lastTaxRate := app.treasuryKeeper.GetTaxRate(ctx, core.GetEpoch(ctx))
-	app.treasuryKeeper.ClearTaxRates(ctx)
-	app.treasuryKeeper.SetTaxRate(ctx, 0, lastTaxRate)
-
-	// left last reward weight
-	lastRewardWeight := app.treasuryKeeper.GetRewardWeight(ctx, core.GetEpoch(ctx))
-	app.treasuryKeeper.ClearRewardWeights(ctx)
-	app.treasuryKeeper.SetRewardWeight(ctx, 0, lastRewardWeight)
+	app.treasuryKeeper.RecordEpochInitialIssuance(ctx)
 }
