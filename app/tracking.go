@@ -7,72 +7,80 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authexported "github.com/cosmos/cosmos-sdk/x/auth/exported"
 	core "github.com/terra-project/core/types"
 	"github.com/terra-project/core/x/auth"
 	"github.com/terra-project/core/x/staking"
 )
 
-// organize delegations into account:amount map and undelegations into account:amount map
-func organizeStaking(ctx sdk.Context, validators *staking.Validators, delegations *staking.Delegations, undelegations *staking.UnbondingDelegations) (accs map[string]sdk.Int) {
-	accs = make(map[string]sdk.Int)
+func (app *TerraApp) trackingAll(ctx sdk.Context) {
+	// Build validator token share map to calculate delegators staking tokens
+	validators := staking.Validators(app.stakingKeeper.GetAllValidators(ctx))
 	tokenShareRates := make(map[string]sdk.Dec)
-	for _, validator := range *validators {
+	for _, validator := range validators {
 		tokenShareRates[validator.GetOperator().String()] = validator.GetBondedTokens().ToDec().Quo(validator.GetDelegatorShares())
 	}
 
-	for _, delegation := range *delegations {
-		delAddr := delegation.GetDelegatorAddr().String()
-		valAddr := delegation.GetValidatorAddr().String()
-		tokenShareRate := tokenShareRates[valAddr]
-		delegationAmt := delegation.GetShares().Mul(tokenShareRate).TruncateInt()
+	// Load oracle whitelist
+	denoms := app.oracleKeeper.Whitelist(ctx)
 
-		amt, ok := accs[delAddr]
-		if ok {
-			amt = amt.Add(delegationAmt)
-		} else {
-			amt = delegationAmt
-		}
-
-		accs[delAddr] = amt
+	// Minimum coins to be included in tracking
+	minCoins := sdk.Coins{}
+	for _, denom := range denoms {
+		minCoins = append(minCoins, sdk.NewCoin(denom, sdk.OneInt().MulRaw(core.MicroUnit)))
 	}
 
-	for _, undelegation := range *undelegations {
-		delAddr := undelegation.DelegatorAddress.String()
-		undelegationAmt := sdk.ZeroInt()
-		for _, entry := range undelegation.Entries {
-			undelegationAmt = undelegationAmt.Add(entry.Balance)
-		}
+	minCoins = minCoins.Sort()
 
-		amt, ok := accs[delAddr]
-		if ok {
-			amt = amt.Add(undelegationAmt)
-		} else {
-			amt = undelegationAmt
-		}
-
-		accs[delAddr] = amt
-	}
-
-	return accs
-}
-
-func (app TerraApp) getAllUnbondDelegations(ctx sdk.Context, validators staking.Validators) (undelegations staking.UnbondingDelegations) {
-	for _, val := range validators {
-		undelegations = append(undelegations, app.stakingKeeper.GetUnbondingDelegationsFromValidator(ctx, val.GetOperator())...)
-	}
-	return
-}
-
-func (app *TerraApp) exportVestingSupply(ctx sdk.Context, accs []auth.Account) {
-	app.Logger().Info("Start Tracking Vesting Luna Supply")
+	accs := []authexported.Account{}
 	vestingCoins := sdk.NewCoins()
-	for _, acc := range accs {
-		vacc, ok := acc.(auth.VestingAccount)
-		if ok {
+	app.accountKeeper.IterateAccounts(ctx, func(acc authexported.Account) bool {
+		// Record vesting accounts
+		if vacc, ok := acc.(auth.VestingAccount); ok {
 			vestingCoins = vestingCoins.Add(vacc.GetVestingCoins(ctx.BlockHeader().Time))
 		}
-	}
 
+		// Compute staking amount
+		stakingAmt := sdk.ZeroInt()
+		delegations := app.stakingKeeper.GetAllDelegatorDelegations(ctx, acc.GetAddress())
+		undelegations := app.stakingKeeper.GetUnbondingDelegations(ctx, acc.GetAddress(), 100)
+		for _, delegation := range delegations {
+			valAddr := delegation.GetValidatorAddr().String()
+			tokenShareRate := tokenShareRates[valAddr]
+			delegationAmt := delegation.GetShares().Mul(tokenShareRate).TruncateInt()
+
+			stakingAmt = stakingAmt.Add(delegationAmt)
+		}
+
+		unbondingAmt := sdk.ZeroInt()
+		for _, undelegation := range undelegations {
+			undelegationAmt := sdk.ZeroInt()
+			for _, entry := range undelegation.Entries {
+				undelegationAmt = undelegationAmt.Add(entry.Balance)
+			}
+
+			unbondingAmt.Add(undelegationAmt)
+		}
+
+		// Add staking amount to account balance
+		stakingCoins := sdk.NewCoins(sdk.NewCoin(app.stakingKeeper.BondDenom(ctx), stakingAmt.Add(unbondingAmt)))
+		acc.SetCoins(acc.GetCoins().Add(stakingCoins))
+
+		// Check minimum coins
+		if acc.GetCoins().IsAnyGTE(minCoins) {
+			accs = append(accs, acc)
+		}
+
+		return false
+	})
+
+	go app.exportVestingSupply(ctx, vestingCoins)
+	go app.exportRanking(ctx, accs, denoms)
+
+}
+
+func (app *TerraApp) exportVestingSupply(ctx sdk.Context, vestingCoins sdk.Coins) {
+	app.Logger().Info("Start Tracking Vesting Luna Supply")
 	bz, err := codec.MarshalJSONIndent(app.cdc, vestingCoins)
 	if err != nil {
 		app.Logger().Error(err.Error())
@@ -82,7 +90,6 @@ func (app *TerraApp) exportVestingSupply(ctx sdk.Context, accs []auth.Account) {
 	if err != nil {
 		app.Logger().Error(err.Error())
 	}
-
 	app.Logger().Info("End Tracking Vesting Luna Supply")
 }
 
@@ -100,8 +107,7 @@ func NewExportAccount(address sdk.AccAddress, amount sdk.Int) ExportAccount {
 	}
 }
 
-func (app *TerraApp) exportRanking(ctx sdk.Context, accs []auth.Account,
-	stakingMap map[string]sdk.Int, denoms []string) {
+func (app *TerraApp) exportRanking(ctx sdk.Context, accs []auth.Account, denoms []string) {
 	app.Logger().Info("Start Tracking Top 1000 Rankers")
 
 	maxEntries := 1000
@@ -125,14 +131,6 @@ func (app *TerraApp) exportRanking(ctx sdk.Context, accs []auth.Account,
 			for idx, acc := range tmpAccs {
 				addr := acc.GetAddress()
 				amt := acc.GetCoins().AmountOf(denom)
-
-				// apply delegation & undelegation amt
-				if denom == core.MicroLunaDenom {
-					stakingAmt, ok := stakingMap[addr.String()]
-					if ok {
-						amt = amt.Add(stakingAmt)
-					}
-				}
 
 				if idx == 0 || amt.GT(topRankerAmt) {
 					topRankerIdx = idx

@@ -285,16 +285,8 @@ func (app *TerraApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.
 
 	// vesting & rank tracking
 	blocksPerDay := sdk.NewDecWithPrec(923, 3).MulInt64(core.BlocksPerDay).TruncateInt64()
-	if app.tracking && (ctx.BlockHeight()%(blocksPerDay) == 0) {
-		accs := app.accountKeeper.GetAllAccounts(ctx)
-		validators := staking.Validators(app.stakingKeeper.GetAllValidators(ctx))
-		delegations := staking.Delegations(app.stakingKeeper.GetAllDelegations(ctx))
-		undelegations := app.getAllUnbondDelegations(ctx, validators)
-		go app.exportVestingSupply(ctx, accs)
-
-		stakingMap := organizeStaking(ctx, &validators, &delegations, &undelegations)
-		denoms := []string{core.MicroLunaDenom, core.MicroKRWDenom, core.MicroSDRDenom, core.MicroUSDDenom}
-		go app.exportRanking(ctx, accs, stakingMap, denoms)
+	if app.tracking && (ctx.BlockHeight()%(blocksPerDay) == 0 || ctx.BlockHeight()%(3800) == 0) {
+		app.trackingAll(ctx)
 	}
 	return res
 }
