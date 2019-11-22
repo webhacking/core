@@ -249,7 +249,34 @@ func NewTerraApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest 
 
 // BeginBlocker defines application updates at every begin block
 func (app *TerraApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
-	return app.mm.BeginBlock(ctx, req)
+
+	res := app.mm.BeginBlock(ctx, req)
+
+	// Load all tax caps
+	taxCaps := sdk.Coins{}
+	app.treasuryKeeper.IterateTaxCap(ctx, func(denom string, taxCap sdk.Int) bool {
+		taxCaps = append(taxCaps, sdk.NewCoin(denom, taxCap))
+		return false
+	})
+
+	// Record tax rate and tax caps as BeginBlocker event
+	events := sdk.Events{
+		sdk.NewEvent(
+			"treasury",
+			sdk.NewAttribute(
+				"tax_rate",
+				app.treasuryKeeper.GetTaxRate(ctx).String(),
+			),
+			sdk.NewAttribute(
+				"tax_caps",
+				taxCaps.Sort().String(),
+			),
+		),
+	}
+
+	res.Events = append(res.Events, events.ToABCIEvents()...)
+
+	return res
 }
 
 // EndBlocker defines application updates at every end block
