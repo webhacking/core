@@ -34,7 +34,7 @@ const (
 // Default parameter values
 var (
 	DefaultVoteThreshold     = sdk.NewDecWithPrec(50, 2)                                             // 50%
-	DefaultRewardBand        = sdk.NewDecWithPrec(1, 2)                                              // 1%
+	DefaultRewardBand        = sdk.NewDecWithPrec(2, 2)                                              // 1%
 	DefaultWhitelist         = DenomList{core.MicroKRWDenom, core.MicroSDRDenom, core.MicroUSDDenom} // ukrw, usdr, uusd
 	DefaultSlashFraction     = sdk.NewDecWithPrec(1, 4)                                              // 0.01%
 	DefaultMinValidPerWindow = sdk.NewDecWithPrec(5, 2)                                              // 5%
@@ -119,7 +119,7 @@ func (params Params) String() string {
 	Whitelist                    %s
 	SlashFraction                %s
 	SlashWindow                  %d
-	MinValidPerWindow       %s
+	MinValidPerWindow            %s
 	`, params.VotePeriod, params.VoteThreshold, params.RewardBand,
 		params.RewardDistributionWindow, params.Whitelist,
 		params.SlashFraction, params.SlashWindow, params.MinValidPerWindow)
