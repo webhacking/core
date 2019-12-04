@@ -48,8 +48,14 @@ var (
 		sdk.ValAddress(PubKeys[2].Address()),
 	}
 
-	InitTokens = sdk.TokensFromConsensusPower(200)
-	InitCoins  = sdk.NewCoins(sdk.NewCoin(core.MicroLunaDenom, InitTokens))
+	InitTokens = sdk.TokensFromConsensusPower(200000000000)
+	InitCoins  = sdk.NewCoins(
+		sdk.NewCoin(core.MicroLunaDenom, InitTokens),
+		sdk.NewCoin(core.MicroUSDDenom, InitTokens),
+		sdk.NewCoin(core.MicroSDRDenom, InitTokens),
+		sdk.NewCoin(core.MicroKRWDenom, InitTokens),
+		sdk.NewCoin(core.MicroMNTDenom, InitTokens),
+	).Sort()
 )
 
 // TestInput nolint
@@ -126,7 +132,11 @@ func CreateTestInput(t *testing.T) TestInput {
 	}
 
 	supplyKeeper := supply.NewKeeper(cdc, keySupply, accountKeeper, bankKeeper, maccPerms)
-	totalSupply := sdk.NewCoins(sdk.NewCoin(core.MicroLunaDenom, InitTokens.MulRaw(int64(len(Addrs)))))
+	totalSupply := sdk.Coins{}
+	for _, coin := range InitCoins {
+		totalSupply = append(totalSupply, sdk.NewCoin(coin.Denom, coin.Amount.MulRaw(int64(len(Addrs)))))
+	}
+
 	supplyKeeper.SetSupply(ctx, supply.NewSupply(totalSupply))
 
 	stakingKeeper := staking.NewKeeper(
@@ -174,10 +184,6 @@ func CreateTestInput(t *testing.T) TestInput {
 		_, err := bankKeeper.AddCoins(ctx, sdk.AccAddress(addr), InitCoins)
 		require.NoError(t, err)
 	}
-
-	supply := supplyKeeper.GetSupply(ctx)
-	supply = supply.SetTotal(sdk.NewCoins(sdk.NewCoin(core.MicroLunaDenom, InitTokens.MulRaw(int64(len(Addrs))))))
-	supplyKeeper.SetSupply(ctx, supply)
 
 	return TestInput{ctx, cdc, oracleKeeper, supplyKeeper, keeper}
 }
