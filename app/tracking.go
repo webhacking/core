@@ -64,7 +64,12 @@ func (app *TerraApp) trackingAll(ctx sdk.Context) {
 
 		// Add staking amount to account balance
 		stakingCoins := sdk.NewCoins(sdk.NewCoin(app.stakingKeeper.BondDenom(ctx), stakingAmt.Add(unbondingAmt)))
-		acc.SetCoins(acc.GetCoins().Add(stakingCoins))
+		err := acc.SetCoins(acc.GetCoins().Add(stakingCoins))
+
+		// Never occurs
+		if err != nil {
+			return false
+		}
 
 		// Check minimum coins
 		if acc.GetCoins().IsAnyGTE(minCoins) {
