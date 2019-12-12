@@ -18,7 +18,9 @@ func (app *TerraApp) trackingAll(ctx sdk.Context) {
 	validators := staking.Validators(app.stakingKeeper.GetAllValidators(ctx))
 	tokenShareRates := make(map[string]sdk.Dec)
 	for _, validator := range validators {
-		tokenShareRates[validator.GetOperator().String()] = validator.GetBondedTokens().ToDec().Quo(validator.GetDelegatorShares())
+		if validator.IsBonded() {
+			tokenShareRates[validator.GetOperator().String()] = validator.GetBondedTokens().ToDec().Quo(validator.GetDelegatorShares())
+		}
 	}
 
 	// Load oracle whitelist
@@ -46,10 +48,10 @@ func (app *TerraApp) trackingAll(ctx sdk.Context) {
 		undelegations := app.stakingKeeper.GetUnbondingDelegations(ctx, acc.GetAddress(), 100)
 		for _, delegation := range delegations {
 			valAddr := delegation.GetValidatorAddr().String()
-			tokenShareRate := tokenShareRates[valAddr]
-			delegationAmt := delegation.GetShares().Mul(tokenShareRate).TruncateInt()
-
-			stakingAmt = stakingAmt.Add(delegationAmt)
+			if tokenShareRate, ok := tokenShareRates[valAddr]; ok {
+				delegationAmt := delegation.GetShares().Mul(tokenShareRate).TruncateInt()
+				stakingAmt = stakingAmt.Add(delegationAmt)
+			}
 		}
 
 		unbondingAmt := sdk.ZeroInt()
