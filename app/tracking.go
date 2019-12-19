@@ -14,6 +14,12 @@ import (
 )
 
 /*
+// DelegatorInfo struct for exporting delegation rank
+type DelegatorInfo struct {
+	Delegator sdk.AccAddress `json:"delegator"`
+	Amount    sdk.Int        `json:"amount"`
+}
+
 func (app *TerraApp) trackDelegation(ctx sdk.Context) {
 	// Build validator token share map to calculate delegators staking tokens
 	validators := staking.Validators(app.stakingKeeper.GetAllValidators(ctx))
@@ -25,42 +31,50 @@ func (app *TerraApp) trackDelegation(ctx sdk.Context) {
 	}
 
 	delegations := app.stakingKeeper.GetAllDelegations(ctx)
+	delegatorInfos := make(map[string]DelegatorInfo)
+
+	for _, delegation := range delegations {
+		addr := delegation.GetDelegatorAddr()
+		valAddr := delegation.GetValidatorAddr()
+		amt := sdk.ZeroInt()
+
+		if tokenShareRate, ok := tokenShareRates[valAddr.String()]; ok {
+			amt = delegation.GetShares().Mul(tokenShareRate).TruncateInt()
+		}
+
+		if info, ok := delegatorInfos[addr.String()]; ok {
+			info.Amount = info.Amount.Add(amt)
+			delegatorInfos[addr.String()] = info
+		} else {
+			delegatorInfos[addr.String()] = DelegatorInfo{
+				Delegator: addr,
+				Amount:    amt,
+			}
+		}
+	}
+
 	maxEntries := 20
 	if len(delegations) < maxEntries {
 		maxEntries = len(delegations)
 	}
 
-	var topDelegaterList []staking.DelegationResponse
-
+	var topDelegaterList []DelegatorInfo
 	for i := 0; i < maxEntries; i++ {
 
 		var topRankerAmt sdk.Int
-		var topRankerIdx int
+		var topRankerKey string
 
-		for idx, delegation := range delegations {
-			valAddr := delegation.GetValidatorAddr()
-			amt := sdk.ZeroInt()
+		for key, info := range delegatorInfos {
+			amt := info.Amount
 
-			if tokenShareRate, ok := tokenShareRates[valAddr.String()]; ok {
-				amt = delegation.GetShares().Mul(tokenShareRate).TruncateInt()
-			}
-
-			if idx == 0 || amt.GT(topRankerAmt) {
-				topRankerIdx = idx
+			if len(topRankerKey) == 0 || amt.GT(topRankerAmt) {
+				topRankerKey = key
 				topRankerAmt = amt
 			}
 		}
 
-		topDelegation := delegations[topRankerIdx]
-		topDelegaterList = append(topDelegaterList, staking.NewDelegationResp(
-			topDelegation.GetDelegatorAddr(),
-			topDelegation.GetValidatorAddr(),
-			topDelegation.GetShares(),
-			topRankerAmt,
-		))
-
-		delegations[topRankerIdx] = delegations[len(delegations)-1]
-		delegations = delegations[:len(delegations)-1]
+		topDelegaterList = append(topDelegaterList, delegatorInfos[topRankerKey])
+		delete(delegatorInfos, topRankerKey)
 	}
 
 	bz, err := codec.MarshalJSONIndent(app.cdc, topDelegaterList)

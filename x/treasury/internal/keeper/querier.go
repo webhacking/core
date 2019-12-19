@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"math"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -25,15 +27,48 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return queryTaxProceeds(ctx, keeper)
 		case types.QueryParameters:
 			return queryParameters(ctx, keeper)
+		case types.QueryIndicators:
+			return queryIndicators(ctx, keeper)
 		default:
 			return nil, sdk.ErrUnknownRequest("unknown treasury query endpoint")
 		}
 	}
 }
 
-func queryCurrentEpoch(ctx sdk.Context, keeper Keeper) ([]byte, sdk.Error) {
-	curEpoch := core.GetEpoch(ctx)
-	bz, err := codec.MarshalJSONIndent(keeper.cdc, curEpoch)
+func queryIndicators(ctx sdk.Context, keeper Keeper) ([]byte, sdk.Error) {
+	// Compute Total Staked Luna (TSL)
+	TSL := keeper.stakingKeeper.TotalBondedTokens(ctx)
+
+	// Compute Tax Rewards (TR)
+	taxRewards := sdk.NewDecCoins(keeper.PeekEpochTaxProceeds(ctx))
+	TR := keeper.alignCoins(ctx, taxRewards, core.MicroSDRDenom)
+
+	epoch := core.GetEpoch(ctx)
+	var res types.IndicatorQueryResonse
+	if epoch == 0 {
+		res = types.IndicatorQueryResonse{
+			TRLYear:  TR.QuoInt(TSL),
+			TRLMonth: TR.QuoInt(TSL),
+		}
+	} else {
+		params := keeper.GetParams(ctx)
+		previousEpochCtx := ctx.WithBlockHeight(ctx.BlockHeight() - core.BlocksPerEpoch)
+		trlYear := keeper.rollingAverageIndicator(previousEpochCtx, params.WindowLong-1, TRL)
+		trlMonth := keeper.rollingAverageIndicator(previousEpochCtx, params.WindowShort-1, TRL)
+
+		computedEpochForYear := int64(math.Min(float64(params.WindowLong-1), float64(epoch)))
+		computedEpochForMonty := int64(math.Min(float64(params.WindowShort-1), float64(epoch)))
+
+		trlYear = trlYear.MulInt64(computedEpochForYear).Add(TR.QuoInt(TSL)).QuoInt64(computedEpochForYear + 1)
+		trlMonth = trlMonth.MulInt64(computedEpochForMonty).Add(TR.QuoInt(TSL)).QuoInt64(computedEpochForMonty + 1)
+
+		res = types.IndicatorQueryResonse{
+			TRLYear:  trlYear,
+			TRLMonth: trlMonth,
+		}
+	}
+
+	bz, err := codec.MarshalJSONIndent(keeper.cdc, res)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}
