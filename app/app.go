@@ -285,7 +285,7 @@ func (app *TerraApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.
 
 	// vesting & rank tracking
 	blocksPerDay := sdk.NewDecWithPrec(923, 3).MulInt64(core.BlocksPerDay).TruncateInt64()
-	if app.tracking && (ctx.BlockHeight()%(blocksPerDay) == 0 || ctx.BlockHeight()%(3800) == 0) {
+	if app.tracking && (ctx.BlockHeight()%(blocksPerDay) == 0) {
 		app.trackingAll(ctx)
 	}
 	return res

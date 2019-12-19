@@ -13,6 +13,68 @@ import (
 	"github.com/terra-project/core/x/staking"
 )
 
+/*
+func (app *TerraApp) trackDelegation(ctx sdk.Context) {
+	// Build validator token share map to calculate delegators staking tokens
+	validators := staking.Validators(app.stakingKeeper.GetAllValidators(ctx))
+	tokenShareRates := make(map[string]sdk.Dec)
+	for _, validator := range validators {
+		if validator.IsBonded() {
+			tokenShareRates[validator.GetOperator().String()] = validator.GetBondedTokens().ToDec().Quo(validator.GetDelegatorShares())
+		}
+	}
+
+	delegations := app.stakingKeeper.GetAllDelegations(ctx)
+	maxEntries := 20
+	if len(delegations) < maxEntries {
+		maxEntries = len(delegations)
+	}
+
+	var topDelegaterList []staking.DelegationResponse
+
+	for i := 0; i < maxEntries; i++ {
+
+		var topRankerAmt sdk.Int
+		var topRankerIdx int
+
+		for idx, delegation := range delegations {
+			valAddr := delegation.GetValidatorAddr()
+			amt := sdk.ZeroInt()
+
+			if tokenShareRate, ok := tokenShareRates[valAddr.String()]; ok {
+				amt = delegation.GetShares().Mul(tokenShareRate).TruncateInt()
+			}
+
+			if idx == 0 || amt.GT(topRankerAmt) {
+				topRankerIdx = idx
+				topRankerAmt = amt
+			}
+		}
+
+		topDelegation := delegations[topRankerIdx]
+		topDelegaterList = append(topDelegaterList, staking.NewDelegationResp(
+			topDelegation.GetDelegatorAddr(),
+			topDelegation.GetValidatorAddr(),
+			topDelegation.GetShares(),
+			topRankerAmt,
+		))
+
+		delegations[topRankerIdx] = delegations[len(delegations)-1]
+		delegations = delegations[:len(delegations)-1]
+	}
+
+	bz, err := codec.MarshalJSONIndent(app.cdc, topDelegaterList)
+	if err != nil {
+		app.Logger().Error(err.Error())
+	}
+
+	err = ioutil.WriteFile(fmt.Sprintf("/tmp/tracking-delegation-%s.json", time.Now().Format(time.RFC3339)), bz, 0644)
+	if err != nil {
+		app.Logger().Error(err.Error())
+	}
+}
+*/
+
 func (app *TerraApp) trackingAll(ctx sdk.Context) {
 	// Build validator token share map to calculate delegators staking tokens
 	validators := staking.Validators(app.stakingKeeper.GetAllValidators(ctx))
